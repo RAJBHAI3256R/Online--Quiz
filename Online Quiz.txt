@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Online Quiz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    body {
+      margin: 0;
+      background: linear-gradient(to right, #74ebd5, #acb6e5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 30px 10px;
+      animation: fadeIn 1s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .quiz-container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 25px;
+      width: 100%;
+      max-width: 650px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      transition: transform 0.4s ease;
+    }
+    .quiz-container:hover {
+      transform: scale(1.02);
+    }
+    .question {
+      font-size: 24px;
+      margin-bottom: 20px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    .answers button {
+      display: block;
+      margin: 10px auto;
+      padding: 12px 20px;
+      width: 90%;
+      font-size: 16px;
+      border: none;
+      border-radius: 12px;
+      background: #3498db;
+      color: white;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    .answers button:hover {
+      background-color: #2980b9;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    .answers button:disabled {
+      background-color: #d3d3d3;
+      color: #666;
+      cursor: not-allowed;
+    }
+    #result {
+      font-size: 20px;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    .start-over {
+      margin-top: 30px;
+      padding: 12px 24px;
+      background-color: #16a085;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+    .start-over:hover {
+      background-color: #138d75;
+    }
+    .correct {
+      background-color: #27ae60 !important;
+    }
+    .incorrect {
+      background-color: #e74c3c !important;
+    }
+    .progress-bar {
+      height: 8px;
+      border-radius: 5px;
+      background-color: #dfe6e9;
+      overflow: hidden;
+      margin-bottom: 25px;
+    }
+    .progress {
+      height: 100%;
+      width: 0%;
+      background-color: #2ecc71;
+      transition: width 0.4s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="progress-bar"><div id="progress" class="progress"></div></div>
+    <div id="quiz">
+      <div class="question" id="question">Question text</div>
+      <div class="answers">
+        <button onclick="checkAnswer(this)">Answer 1</button>
+        <button onclick="checkAnswer(this)">Answer 2</button>
+        <button onclick="checkAnswer(this)">Answer 3</button>
+        <button onclick="checkAnswer(this)">Answer 4</button>
+      </div>
+      <div id="result"></div>
+    </div>
+    <button id="start-over" class="start-over" style="display: none;" onclick="startOver()">🔄 Start Over</button>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        question: "What is the capital of India?",
+        options: ["Delhi", "Mumbai", "Kolkata", "Chennai"],
+        answer: "Delhi",
+      },
+      {
+        question: "Which language is used to style web pages?",
+        options: ["HTML", "CSS", "JavaScript", "Python"],
+        answer: "CSS",
+      },
+      {
+        question: "Which is not a programming language?",
+        options: ["Python", "HTML", "Java", "C++"],
+        answer: "HTML",
+      },
+      {
+        question: "What does HTML stand for?",
+        options: [
+          "HyperText Markup Language",
+          "HighText Machine Language",
+          "Hyperloop Text Module",
+          "None of these",
+        ],
+        answer: "HyperText Markup Language",
+      },
+      {
+        question: "Which tag is used for a hyperlink in HTML?",
+        options: ["<link>", "<href>", "<a>", "<src>"],
+        answer: "<a>",
+      },
+      {
+        question: "Which company developed JavaScript?",
+        options: ["Microsoft", "Google", "Netscape", "IBM"],
+        answer: "Netscape",
+      },
+      {
+        question: "Which HTML tag is used to display images?",
+        options: ["<pic>", "<img>", "<src>", "<image>"],
+        answer: "<img>",
+      },
+      {
+        question: "Which of the following is a loop structure in JavaScript?",
+        options: ["for", "while", "do-while", "All of these"],
+        answer: "All of these",
+      },
+      {
+        question: "Which symbol is used for comments in JavaScript?",
+        options: ["<!-- -->", "//", "/* */", "Both B and C"],
+        answer: "Both B and C",
+      },
+      {
+        question: "Which property changes the text color in CSS?",
+        options: ["font-color", "text-color", "color", "text-style"],
+        answer: "color",
+      },
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+
+    function loadQuestion() {
+      const q = questions[currentQuestion];
+      document.getElementById("question").innerText = q.question;
+      const buttons = document.querySelectorAll(".answers button");
+      buttons.forEach((btn, i) => {
+        btn.innerText = q.options[i];
+        btn.className = "";
+        btn.disabled = false;
+      });
+      document.getElementById("result").innerText = "";
+      document.getElementById("progress").style.width = ${(currentQuestion / questions.length) * 100}%;
+    }
+
+    function checkAnswer(button) {
+      let selected = button.innerText;
+      let correct = questions[currentQuestion].answer;
+      const result = document.getElementById("result");
+      const buttons = document.querySelectorAll(".answers button");
+
+      buttons.forEach((btn) => {
+        btn.disabled = true;
+        if (btn.innerText === correct) {
+          btn.classList.add("correct");
+        }
+      });
+
+      if (selected === correct) {
+        score++;
+        result.innerText = "✅ Correct!";
+        result.style.color = "#27ae60";
+      } else {
+        result.innerText = ❌ Wrong! Correct: ${correct};
+        result.style.color = "#e74c3c";
+        button.classList.add("incorrect");
+      }
+
+      setTimeout(() => {
+        currentQuestion++;
+        if (currentQuestion < questions.length) {
+          loadQuestion();
+        } else {
+          showFinalScore();
+        }
+      }, 1600);
+    }
+
+    function showFinalScore() {
+      document.getElementById("quiz").innerHTML = `
+        <h2>🎉 Quiz Finished!</h2>
+        <p>Your Score: ${score} / ${questions.length}</p>
+      `;
+      document.getElementById("progress").style.width = 100%;
+      document.getElementById("start-over").style.display = "block";
+    }
+
+    function startOver() {
+      currentQuestion = 0;
+      score = 0;
+      document.getElementById("start-over").style.display = "none";
+      document.getElementById("quiz").innerHTML = `
+        <div class="question" id="question">Question text</div>
+        <div class="answers">
+          <button onclick="checkAnswer(this)">Answer 1</button>
+          <button onclick="checkAnswer(this)">Answer 2</button>
+          <button onclick="checkAnswer(this)">Answer 3</button>
+          <button onclick="checkAnswer(this)">Answer 4</button>
+        </div>
+        <div id="result"></div>
+      `;
+      loadQuestion();
+    }
+
+    loadQuestion();
+  </script>
+</body>
+</html>
